@@ -23,9 +23,11 @@ Exposed-modules:
   Lava
   Lava.Binary
   Lava.Bit
+  Lava.C
   Lava.JList
   Lava.Prelude
   Lava.Vector
+  Lava.Verilog
   Lava.Vhdl
 Extra-Source-Files:
   examples/Cube.hs
