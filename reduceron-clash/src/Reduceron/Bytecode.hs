@@ -106,10 +106,16 @@ data Template = Template
 deriving instance BitPack Template
 
 mapTemplateAtoms :: (Atom -> Atom) -> Template -> Template
-mapTemplateAtoms f Template {..} =
-  Template
+mapTemplateAtoms f Template {..} = Template
     { top = f top
     , app2Atoms = fmap f app2Atoms
     , app1 = mapApplicationAtoms f app1
     , ..}
 
+mainAtom, falseAtom, trueAtom :: Atom
+mainAtom  = Fun 1 0 0
+falseAtom = CON 1 0
+trueAtom  = CON 1 1
+
+bool :: Bit -> Atom
+bool b = CON 1 (fromIntegral b)
