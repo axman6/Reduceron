@@ -1,6 +1,15 @@
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# OPTIONS_GHC -Wno-unused-local-binds #-}
+
 module Reduceron.Bytecode where
 
+
 import Clash.Prelude
+import Clash.Annotations.BitRepresentation
+import Clash.Annotations.BitRepresentation.Deriving
+import Data.Proxy (Proxy)
 
 type MaxFunArity = 7
 type MaxConstructorArity = 6
@@ -8,7 +17,7 @@ type MaxConstructorArity = 6
 type ToSpaceBits = 13
 type HeapBits    = ToSpaceBits + 1
 type StackBits   = 10
-type ArityBits   = 1
+type ArityBits   = 3
 type FunBits     = 10
 type UStackBits  = 9
 type LStackBits  = 9
@@ -24,20 +33,36 @@ type LStackAddr  = Unsigned LStackBits
 
 type AppPtr      = Unsigned 15
 type ConIndex    = Unsigned 10
-type PrimInt     = Signed NumberBits
+type PrimInt     = Signed   NumberBits
 type ArgIndex    = Unsigned 8
 type RegIndex    = Unsigned 8
 type Update      = (UStackAddr, HeapAddr)
 
 
+maskFor :: forall a. BitPack a => Proxy a -> Integer
+maskFor _ = complement $ fromIntegral (0 :: BitVector (BitSize a))
 
-data Bytecode
-  = {- 000 -} FUN  Arity FunAddr Bit
-  | {- 001 -} PRIM Arity (BitVector 12)   -- TODO
-  | {- 010 -} APP  AppPtr
-  | {- 011 -} SAPP AppPtr
+data Atom
+  = {- 000 -} Fun  Arity FunAddr Bit
+  | {- 001 -} Prim Arity (BitVector 12)   -- TODO
+  | {- 010 -} App  AppPtr
+  | {- 011 -} SApp AppPtr
   | {- 100 -} INT  PrimInt
   | {- 101 -} CON  Arity ConIndex
   | {- 110 -} ARG  Bit ArgIndex
   | {- 111 -} REG  Bit RegIndex
 
+{-# ANN module (DataReprAnn
+                  $(liftQ [t|Atom|])
+                  18
+                  [ ConstrRepr 'Fun  0b111 0b000 [0b111,0b11_1111_1111,0b1 ]
+                  , ConstrRepr 'Prim 0b111 0b001 [0b111,0b1111_1111_1111]
+                  , ConstrRepr 'App  0b111 0b010 [0b111_1111_1111_1111]
+                  , ConstrRepr 'SApp 0b111 0b011 [0b111_1111_1111_1111]
+                  , ConstrRepr 'INT  0b111 0b100 [0b111_1111_1111_1111]
+                  , ConstrRepr 'CON  0b111 0b101 [0b111,0b11_1111_1111]
+                  , ConstrRepr 'ARG  0b111 0b110 [0b1, 0b1111_1111]
+                  , ConstrRepr 'REG  0b111 0b111 [0b1, 0b1111_1111]
+                  ]) #-}
+
+deriveBitPack [t|Atom|]
