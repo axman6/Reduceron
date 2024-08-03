@@ -2,6 +2,8 @@
 {-# LANGUAGE QuasiQuotes #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# OPTIONS_GHC -Wno-unused-local-binds #-}
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 
 module Reduceron.Bytecode where
 
@@ -51,6 +53,7 @@ data Atom
   | {- 101 -} CON  Arity ConIndex
   | {- 110 -} ARG  Bit ArgIndex
   | {- 111 -} REG  Bit RegIndex
+  deriving (Show, Generic, ShowX, NFDataX)
 
 {-# ANN module (DataReprAnn
                   $(liftQ [t|Atom|])
@@ -66,3 +69,14 @@ data Atom
                   ]) #-}
 
 deriveBitPack [t|Atom|]
+
+type AppArity = Unsigned 2
+data Application = Application
+  { arity     :: AppArity
+  , nf        :: Bit
+  , hasAlts   :: Bit
+  , collected :: Bit
+  , atoms     :: Vec 4 Atom
+  } deriving (Show, Generic, ShowX, NFDataX)
+
+deriving instance BitPack Application
