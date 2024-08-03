@@ -1,0 +1,11 @@
+packages:
+  red-lava/red-lava.cabal
+  flite/flite.cabal
+  fpga/reduceron-fpga.cabal
+  -- ghc-flite/ghc-flite.cabal
+
+
+write-ghc-environment-files: always
+
+-- package clash-prelude
+--   flags: -large-tuples
