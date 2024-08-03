@@ -53,21 +53,23 @@ extra-doc-files:    CHANGELOG.md
 common warnings
     ghc-options: -Wall
 
+
 library
     -- Import common warning flags.
     import:           warnings
 
     -- Modules exported by the library.
-    exposed-modules:  MyLib
+    exposed-modules:  Reduceron.Bytecode
 
     -- Modules included in this library but not exported.
     -- other-modules:
 
     -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
+    default-extensions: DataKinds
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.19.1.0
+    build-depends:  base ^>=4.19.1.0,
+                    clash-prelude
 
     -- Directories containing source files.
     hs-source-dirs:   src
