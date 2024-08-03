@@ -42,12 +42,25 @@ type RegIndex    = Unsigned 8
 type Update      = (UStackAddr, HeapAddr)
 
 
-maskFor :: forall a. BitPack a => Proxy a -> Integer
-maskFor _ = complement $ fromIntegral (0 :: BitVector (BitSize a))
+-- TODO: This should cover a lot more
+data Prim
+  = PPlus
+  | PSub
+  | PEQ
+  | PNEQ
+  | PLEQ
+  | PAND
+  | PST32
+  | PLD32
+  deriving (Show, Generic, ShowX, NFDataX)
+
+-- TODO: This seems wasteful, and greatly limits the number of primitives - I want popcount!
+deriveAnnotation (simpleDerivator OneHot OverlapL) [t|Prim|]
+deriveBitPack [t|Prim|]
 
 data Atom
   = {- 000 -} Fun  Arity FunAddr Bit
-  | {- 001 -} Prim Arity (BitVector 12)   -- TODO
+  | {- 001 -} Prim Arity Prim   -- TODO
   | {- 010 -} App  AppPtr
   | {- 011 -} SApp AppPtr
   | {- 100 -} INT  PrimInt
