@@ -55,16 +55,24 @@ type UpdateN      = N24 -- ew (UStackAddrN + HeapAddrN)
 type NumberN      = S HeapAddrN
 type Number       = Word NumberN
 
-heapAddrN         = undefined :: HeapAddrN
+heapAddrN :: HeapAddrN
+heapAddrN         = undefined
+heapAddrWidth :: Int
 heapAddrWidth     = value heapAddrN
 
-funAddrN          = undefined :: FunAddrN
+funAddrN :: FunAddrN
+funAddrN          = undefined
+funAddrWidth :: Int
 funAddrWidth      = value funAddrN
 
-stackAddrN        = undefined :: StackAddrN
+stackAddrN :: StackAddrN
+stackAddrN        = undefined
+stackAddrWidth :: Int
 stackAddrWidth    = value stackAddrN
 
-numberN           = undefined :: NumberN
+numberN :: NumberN
+numberN           = undefined
+numberWidth :: Int
 numberWidth       = value numberN
 
 -- Atoms
@@ -72,8 +80,11 @@ numberWidth       = value numberN
 type AtomN        = S (S (S NumberN))
 type Atom         = Word AtomN
 
-atomN             = undefined :: AtomN
+atomN :: AtomN
+atomN             = undefined
+atomWidth :: Int
 atomWidth         = value atomN :: Int
+atomWidth5 :: N90
 atomWidth5        = n90 -- = 5 * atomN. Ew, is there a better way?
 
 isFUN :: Atom -> Bit
@@ -93,6 +104,7 @@ funAddr = vtake funAddrN `o` snd `o` splitFunAtom
 funFirst :: Atom -> Bit
 funFirst = vlast `o` snd `o` splitFunAtom
 
+funTag :: Word N3
 funTag = low +> low +> low +> vempty
 
 makeFUN :: Bit -> Word N3 -> FunAddr -> Atom
@@ -125,14 +137,14 @@ b2i False = 0
 b2i True = 1
 
 primADD, primSUB, primEQ, primNEQ, primLEQ, primAND, primST32 :: Bool -> Integer
-primADD s = 4 .|. (2 `shiftL` 3) .|. ((b2i s) `shiftL` 6) .|. (1 `shiftL` 7)
-primSUB s = 4 .|. (2 `shiftL` 3) .|. ((b2i s) `shiftL` 6) .|. (1 `shiftL` 8)
-primEQ  s = 4 .|. (2 `shiftL` 3) .|. ((b2i s) `shiftL` 6) .|. (1 `shiftL` 9)
-primNEQ s = 4 .|. (2 `shiftL` 3) .|. ((b2i s) `shiftL` 6) .|. (1 `shiftL` 10)
-primLEQ s = 4 .|. (2 `shiftL` 3) .|. ((b2i s) `shiftL` 6) .|. (1 `shiftL` 11)
-primAND s = 4 .|. (2 `shiftL` 3) .|. ((b2i s) `shiftL` 6) .|. (1 `shiftL` 12)
-primST32 s = 4 .|. (2 `shiftL` 3) .|. ((b2i s) `shiftL` 6) .|. (1 `shiftL` 13)
-primLD32 s = 4 .|. (2 `shiftL` 3) .|. ((b2i s) `shiftL` 6) .|. (1 `shiftL` 14)
+primADD s = 4 .|. (2 `shiftL` 3) .|. (b2i s `shiftL` 6) .|. (1 `shiftL` 7)
+primSUB s = 4 .|. (2 `shiftL` 3) .|. (b2i s `shiftL` 6) .|. (1 `shiftL` 8)
+primEQ  s = 4 .|. (2 `shiftL` 3) .|. (b2i s `shiftL` 6) .|. (1 `shiftL` 9)
+primNEQ s = 4 .|. (2 `shiftL` 3) .|. (b2i s `shiftL` 6) .|. (1 `shiftL` 10)
+primLEQ s = 4 .|. (2 `shiftL` 3) .|. (b2i s `shiftL` 6) .|. (1 `shiftL` 11)
+primAND s = 4 .|. (2 `shiftL` 3) .|. (b2i s `shiftL` 6) .|. (1 `shiftL` 12)
+primST32 s = 4 .|. (2 `shiftL` 3) .|. (b2i s `shiftL` 6) .|. (1 `shiftL` 13)
+primLD32 s = 4 .|. (2 `shiftL` 3) .|. (b2i s `shiftL` 6) .|. (1 `shiftL` 14)
 
 isAP :: Atom -> Bit
 isAP a = inv (a `vat` n0) <&> (a `vat` n1)
@@ -245,7 +257,9 @@ Total width of application = 77 bits
 
 type AppN         = N77 -- 5 + 4 * atomN ew
 type App          = Word AppN
-appN              = undefined :: AppN
+appN :: AppN
+appN              = undefined
+appWidth :: Int
 appWidth          = value appN
 
 appArity :: App -> Word N2
@@ -283,9 +297,9 @@ relocatedAddr :: App -> HeapAddr
 relocatedAddr = pointer `o` vhead `o` atoms
 
 encodeApp :: Integer -> Bool -> Bool -> [Integer] -> Integer
-encodeApp arity n c as
-   | arity >= 0 && arity <= 3 && length as <= 4 =
-           arity
+encodeApp arr n c as
+   | arr >= 0 && arr <= 3 && length as <= 4 =
+           arr
        .|. (boolToNum n `shiftL` 2)
        .|. (boolToNum c `shiftL` 3)
        .|. (joinIntegers atomWidth as `shiftL` 5)
@@ -338,21 +352,25 @@ NB: The actual values are different - these are just illustrations
 type TemplateN = N222 -- 10 * atomN + 42  ew
 type Template  = Word TemplateN
 
+tempOffset :: Template -> (Word N4, Word N218)
 tempOffset = vsplitAt n4
 
 templateOffset :: Template -> Word N4
 templateOffset = fst `o` tempOffset
 
+tempTop :: Template -> (Atom, Word N200)
 tempTop = vsplitAt atomN `o` snd `o` tempOffset
 
 templateTop :: Template -> Atom
 templateTop = fst `o` tempTop
 
+tempPushAlts :: Template -> (Word N1, Word N199)
 tempPushAlts = vsplitAt n1 `o` snd `o` tempTop
 
 templatePushAlts :: Template -> Bit
 templatePushAlts = vhead `o` fst `o` tempPushAlts
 
+tempAlts :: Template -> (FunAddr, Word N189)
 tempAlts = vsplitAt funAddrN `o` snd `o` tempPushAlts
 
 templateAlts :: Template -> FunAddr
@@ -486,8 +504,9 @@ boolToNum False = 0
 boolToNum True = 1
 
 joinIntegers :: Int -> [Integer] -> Integer
-joinIntegers n [] = 0
+joinIntegers _ [] = 0
 joinIntegers n (x:xs) = x .|. joinIntegers n (map (`shiftL` n) xs)
 
 infixl 5 <>
+(<>) :: Bits a => (a, Int) -> (a, Int) -> (a, Int)
 (x0, w0) <> (x1, w1) = (x0 .|. x1 `shiftL` w0, w0+w1)

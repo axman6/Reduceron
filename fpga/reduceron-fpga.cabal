@@ -53,9 +53,12 @@ extra-doc-files:    CHANGELOG.md
 common warnings
     ghc-options: -Wall
 
+common compile-flags
+    ghc-options: -O2
+
 library
     -- Import common warning flags.
-    import:           warnings
+    import:           warnings, compile-flags
 
     -- Modules exported by the library.
     exposed-modules: Bytecode ,
@@ -89,7 +92,7 @@ library
 
 executable reduceron-fpga
     -- Import common warning flags.
-    import:           warnings
+    import:           warnings, compile-flags
 
     -- .hs or .lhs file containing the Main module.
     main-is:          Main.hs
