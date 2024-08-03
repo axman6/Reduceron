@@ -1,16 +1,16 @@
-module GHC-Flite.Translate where
+module GHCFlite.Translate where
 
 import qualified Flite.Syntax as Flite
 
-import CoreSyn (Alt, AltCon (..), Bind (..), CoreProgram, CoreBind, Expr (..))
-import Var (Var, Id, idDetails, varName)
-import Unique (getUnique)
-import Literal (Literal (LitInteger))
-import Unique (Uniquable)
-import TypeRep (Type (..))
-import IdInfo (IdDetails (PrimOpId, ClassOpId))
-import PrimOp (PrimOp (IntAddOp, WordAddOp))
-import Class (classKey)
+import GHC.CoreSyn (Alt, AltCon (..), Bind (..), CoreProgram, CoreBind, Expr (..))
+import GHC.Var (Var, Id, idDetails, varName)
+import GHC.Unique (getUnique)
+import GHC.Literal (Literal (LitInteger))
+import GHC.Unique (Uniquable)
+import GHC.TypeRep (Type (..))
+import GHC.IdInfo (IdDetails (PrimOpId, ClassOpId))
+import GHC.PrimOp (PrimOp (IntAddOp, WordAddOp))
+import GHC.Class (classKey)
 
 translate :: CoreProgram -> Flite.Prog
 translate = map translateBind
