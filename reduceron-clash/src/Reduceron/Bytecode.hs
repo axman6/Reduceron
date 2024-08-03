@@ -56,19 +56,8 @@ data Atom
   | {- 111 -} REG  Bit RegIndex
   deriving (Show, Generic, ShowX, NFDataX)
 
-{-# ANN module (DataReprAnn
-                  $(liftQ [t|Atom|])
-                  18
-                  [ ConstrRepr 'Fun  0b111 0b000 [0b111,0b11_1111_1111,0b1 ]
-                  , ConstrRepr 'Prim 0b111 0b001 [0b111,0b1111_1111_1111]
-                  , ConstrRepr 'App  0b111 0b010 [0b111_1111_1111_1111]
-                  , ConstrRepr 'SApp 0b111 0b011 [0b111_1111_1111_1111]
-                  , ConstrRepr 'INT  0b111 0b100 [0b111_1111_1111_1111]
-                  , ConstrRepr 'CON  0b111 0b101 [0b111,0b11_1111_1111]
-                  , ConstrRepr 'ARG  0b111 0b110 [0b1, 0b1111_1111]
-                  , ConstrRepr 'REG  0b111 0b111 [0b1, 0b1111_1111]
-                  ]) #-}
 
+deriveDefaultAnnotation [t|Atom|]
 deriveBitPack [t|Atom|]
 
 type AppArity = Unsigned 2
