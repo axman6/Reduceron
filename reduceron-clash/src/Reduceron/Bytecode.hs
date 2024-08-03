@@ -4,6 +4,7 @@
 {-# OPTIONS_GHC -Wno-unused-local-binds #-}
 {-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Reduceron.Bytecode where
 
@@ -80,3 +81,35 @@ data Application = Application
   } deriving (Show, Generic, ShowX, NFDataX)
 
 deriving instance BitPack Application
+
+mapApplicationAtoms :: (Atom -> Atom) -> Application -> Application
+mapApplicationAtoms f Application{..} =
+  Application { atoms = fmap f atoms, ..}
+
+data Template = Template
+  { offset     :: Signed 4
+  , top        :: Atom
+  , pushAlts   :: Bit
+  , alts       :: Unsigned 10
+  , instAtoms2 :: Bit
+  , app2Header :: Unsigned 5
+  , pushMask   :: BitVector 5
+  , app2Atoms  :: Vec 5 Atom
+  , instApp1   :: Bit
+  , app1       :: Application
+  , app1Prim   :: Bit
+  , app2Prim   :: Bit
+  , destReg1   :: Unsigned 4
+  , destReg2   :: Unsigned 4
+  } deriving (Show, Generic, ShowX, NFDataX)
+
+deriving instance BitPack Template
+
+mapTemplateAtoms :: (Atom -> Atom) -> Template -> Template
+mapTemplateAtoms f Template {..} =
+  Template
+    { top = f top
+    , app2Atoms = fmap f app2Atoms
+    , app1 = mapApplicationAtoms f app1
+    , ..}
+
